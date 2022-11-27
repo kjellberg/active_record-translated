@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary     = "Separate database records for each language, grouped together with an ID"
   spec.license     = "MIT"
 
-  spec.required_ruby_version = ">= 2.6"
+  spec.required_ruby_version = ">= 2.7"
 
   spec.files = Dir["{app,lib,config}/**/*", "LICENSE.md", "README.md"]
 

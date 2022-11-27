@@ -3,7 +3,7 @@
 require "spec_helper"
 require "shoulda/matchers"
 
-RSpec.describe Post, type: :model do
+RSpec.describe "Model", type: :model do
   subject(:post) { create(:post) }
 
   let!(:record_id) { ActiveRecord::Translated.generate_record_id }
@@ -22,7 +22,7 @@ RSpec.describe Post, type: :model do
 
   describe "gem specific model attributes" do
     it { expect(post.locale).to eq(ActiveRecord::Translated.locale.to_s) }
-    it { expect(post.record_id).to be_a_uuid }
+    it { expect(post.record_id).to be_truthy }
   end
 
   describe "#create" do
@@ -30,16 +30,16 @@ RSpec.describe Post, type: :model do
       expect(post.locale).to eq("en")
     end
 
-    it "will set the correct locale" do
-      sv_post = ActiveRecord::Translated.with_locale(:sv) do
-        described_class.create(title: "Ett inl\u00E4gg", slug: "ett-inl\u00E4gg")
-      end
+    it "assigns the correct locale" do
+      ActiveRecord::Translated.locale = :sv
+      sv_post = Post.create(title: "Ett inl\u00E4gg", slug: "ett-inl\u00E4gg")
 
       expect(sv_post.locale).to eq("sv")
     end
 
-    it "is possible to set locale attribute manually" do
-      manual_post = described_class.create(title: "Foo", slug: "bar", locale: "es")
+    it "prioritises locale attribute over config" do
+      ActiveRecord::Translated.locale = :en
+      manual_post = Post.create(title: "Foo", slug: "bar", locale: "es")
 
       expect(manual_post.locale).to eq("es")
     end
@@ -47,17 +47,10 @@ RSpec.describe Post, type: :model do
 
   describe "#update" do
     it "is possible to update locale attribute manually" do
-      manual_post = described_class.create(title: "Foo", slug: "bar")
+      manual_post = Post.create(title: "Foo", slug: "bar")
       manual_post.update(locale: :es)
 
       expect(manual_post.locale).to eq("es")
-    end
-  end
-
-  describe "#find" do
-    it "is not dependent on locale" do
-      ActiveRecord::Translated.locale = :sv
-      expect(described_class.find(post.id)).to eq(post)
     end
   end
 
@@ -65,7 +58,7 @@ RSpec.describe Post, type: :model do
     it { expect(post_sv.record_id).to eq(record_id) }
     it { expect(post_es.record_id).to eq(record_id) }
     it { expect(post_mt.record_id).to eq(record_id) }
-    it { expect(described_class.where(record_id: record_id).count).to eq(3) }
+    it { expect(Post.global.where(record_id: record_id).count).to eq(3) }
   end
 
   describe "#translations" do
@@ -74,7 +67,7 @@ RSpec.describe Post, type: :model do
     it { expect(post_es.translations).to include(post_es) }
 
     it "autofills record_id" do
-      post_fr = described_class.new(title: "Bonjour", locale: :fr)
+      post_fr = Post.new(title: "Bonjour", locale: :fr)
       post_sv.translations << post_fr
       post_sv.save
 
@@ -89,18 +82,27 @@ RSpec.describe Post, type: :model do
     end
   end
 
-  describe "#find_translated" do
-    it "with custom set locale" do
-      ActiveRecord::Translated.locale = :es
-      match = described_class.find_translated(record_id)
+  describe "#find" do
+    context "with primary key" do
+      it "does not break find" do
+        ActiveRecord::Translated.locale = :sv
+        expect(Post.find(post.id)).to eq(post)
+      end
+    end
 
-      expect(match.title).to eq("Buenos dias")
+    context "with resource_id" do
+      it "with gem set locale" do
+        ActiveRecord::Translated.locale = :es
+        match = Post.find(record_id)
+
+        expect(match.title).to eq("Buenos dias")
+      end
     end
 
     it "with locale wrapper" do
       ActiveRecord::Translated.locale = :sv
       match = ActiveRecord::Translated.with_locale(:mt) do
-        described_class.find_translated(record_id)
+        Post.find(record_id)
       end
 
       expect(match.title).to eq("Bongu")
@@ -108,39 +110,30 @@ RSpec.describe Post, type: :model do
 
     it "with non-matching locale" do
       ActiveRecord::Translated.locale = :pt
-      match = described_class.find_translated(record_id)
 
-      expect(match).to be_nil
+      expect { Post.find(record_id) }.to raise_error(ActiveRecord::RecordNotFound)
     end
   end
 
-  describe "#find_translated!" do
-    it "with non-matching locale" do
-      ActiveRecord::Translated.locale = :pt
-
-      expect { described_class.find_translated!(record_id) }.to raise_error(ActiveRecord::RecordNotFound)
-    end
-  end
-
-  describe "#translated" do
+  describe "default_scope" do
     it "is ignored by #find when searching by ID" do
       ActiveRecord::Translated.locale = :pt
-      expect(described_class.translated.find(post.id)).not_to be_nil
+      expect(Post.all.find(post.id)).not_to be_nil
     end
 
     it "includes matching translations" do
       ActiveRecord::Translated.locale = :sv
-      expect(described_class.translated).to include(post_sv)
+      expect(Post.all).to include(post_sv)
     end
 
     it "excludes non-matching translations" do
       ActiveRecord::Translated.locale = :sv
-      expect(described_class.translated).not_to include(post_es)
+      expect(Post.all).not_to include(post_es)
     end
 
     it "with non-matching locale" do
       ActiveRecord::Translated.locale = :pt
-      expect(described_class.translated.count).to eq(0)
+      expect(Post.all.count).to eq(0)
     end
 
     context "with multiple results" do
@@ -152,13 +145,7 @@ RSpec.describe Post, type: :model do
 
       it "displays translated results" do
         ActiveRecord::Translated.with_locale(:de) do
-          expect(described_class.translated.count).to eq(6)
-        end
-      end
-
-      it "ignores locale without #translated" do
-        ActiveRecord::Translated.with_locale(:de) do
-          expect(described_class.count).not_to eq(6)
+          expect(Post.all.count).to eq(6)
         end
       end
     end

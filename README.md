@@ -105,6 +105,7 @@ Your model may look something like this:
 
 ```ruby
 # app/models/post.rb
+
 class Post < ApplicationRecord
   # Enable translations for this model
   include ActiveRecord::Translated::Model
@@ -120,30 +121,51 @@ class Post < ApplicationRecord
 end
 ```
 
-### Create a new record with the default language
+### Create a new record
 
-The creation of a new record will generate a unique `record_id` and set the `locale` to your default language.
+The creation of a new record will autmatically generate a unique `record_id` and set the `locale` attribute to the current locale. The current locale is determined globally by `I18n.locale` and/or within the gem via `ActiveRecord::Translated.locale`, the latter with greater priority. The default locale if nothing is set is `:en`.
 
 ```ruby
-post = Post.create(title: "A post!", ...)
+before_action do
+  I18n.locale = :en_US # fallback if "ActiveRecord::Translated.locale" is not set
+  ActiveRecord::Translated.locale = :en_UK # has priority over "I18n.locale"
+end
 
-post.id # => 5
-post.record_id # => 448ecc54-cc82-4c24-aed4-89fae5d38ec4 (auto-generated)
-post.locale # => :en
+# POST /posts/create
+def create
+  @post = Post.create(title: "A post!", ...)
+
+  @post.id # => 5
+  @post.record_id # => 448ecc54-cc82-4c24-aed4-89fae5d38ec4 (auto-generated)
+  @post.locale # => :en_UK
+  ...
+end
 ```
 
 ### Create a new record in a specific language
 
-To create a post in a language other than the default one, just pass the language code to the `locale` attribute.
+To create a post in a language other than the current locale, just pass a language code to the `locale` attribute.
 
 ```ruby
 post = Post.create(title: "Una entrada de blog", ..., locale: :es)
 post.locale # => :es
 ```
 
+#### Using #with_locale
+
+You can also wrap your code inside `ActiveRecord::Translated#with_locale`. This will temporary override the current locale within the block.
+
+```ruby
+post = ActiveRecord::Translated.with_locale(:es) do
+  Post.create(title: "Una entrada de blog", ...)
+end
+
+post.locale # => :es
+```
+
 ### Create a new translation of an existing record
 
-To translate an already existing post, create a second post with a different `locale` and add it to the first post via `#translations`.
+To translate an already existing post, create a second post with a different `locale` and add it to the first post via `#translations`. This will make sure that our two translations are linked together with a shared `record_id`.
 
 ```ruby
 # Create an english post
@@ -152,7 +174,7 @@ post = Post.create(title: "A post!", ...)
 # Create a spanish translation
 post_es = Post.create(title: "Una entrada de blog", ..., locale: :es)
 
-# Associate the spanish translation with the english post
+# Associate the Spanish translation with the english post
 post.translations << post_es
 
 # Record ID should match:
@@ -166,15 +188,30 @@ post_es.locale # => :es
 
 ### Fetch a translated record
 
-### #find
+Your translated model will automatically scope query results by the current locale. For example, with `I18n.locale` set to `:sv`, your model will only return Swedish results. There's some different ways to fetch translations from the database using ActiveRecord's #find:
 
-There's some different ways to fetch translations from the database using ActiveRecord's finders. The first and most obvious way is to just query a translation by its primary key. If you already now the ID, just do a normal #find. Global locale configurations, for example `I18n.locale`, is ignored by #find since we're fetching a record by its unique primary key.
+#### Find by primary key
+
+The first and most obvious way is to just query a translation by its primary key. If you already now the ID, just do a normal #find:
 
 ```ruby
+I18n.locale = :en # Ignored by #find when fetching a record by its unique primary key.
+
 post = Post.find(4) # English translation
 post_es = Post.find(5) # Spanish translation
 
 post.locale # => :en
+post_es.locale #=> :es
+```
+
+#### Find by record_id
+
+You can also find a translated record by using a record_id as the argument. This will look for a row that matches both the record_id and the current locale:
+
+```ruby
+I18n.locale = :es
+
+post = Post.find("0e048f11-0ad9-48f1-b493-36e1f01d7994") 
 post_es.locale #=> :es
 ```
 

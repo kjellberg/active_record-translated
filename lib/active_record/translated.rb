@@ -18,11 +18,17 @@ module ActiveRecord
 
     class << self
       def generate_record_id
-        SecureRandom.uuid
+        SecureRandom.uuid.split("-")[1..3].join("-")
+      end
+
+      def record_id?(string)
+        return false unless string.is_a?(String)
+
+        string.match(/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$\z/)
       end
 
       def locale
-        read_locale || config.default_locale || I18n.locale
+        read_locale || config.default_locale || I18n.locale || :en
       end
 
       def locale=(locale)

@@ -9,8 +9,18 @@ module ActiveRecord
     it { expect(described_class::VERSION).to be_truthy }
 
     describe "#generate_record_id" do
-      it { expect(described_class.generate_record_id).to be_a_uuid }
+      it do
+        rid = described_class.generate_record_id
+        expect(rid.match(/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$\z/)).not_to be_nil
+      end
     end
+
+    # rubocop:disable RSpec/PredicateMatcher
+    describe "#record_id?" do
+      it { expect(described_class.record_id?("0000-0000-0000")).to be_truthy }
+      it { expect(described_class.record_id?("aaaa-bbbb-cccc")).to be_truthy }
+    end
+    # rubocop:enable RSpec/PredicateMatcher
 
     describe "#locale" do
       before { described_class.locale = :es }
