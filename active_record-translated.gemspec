@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
     "bug_tracker_uri" => "https://github.com/kjellberg/active_record-translated/issues",
     "documentation_uri" => "https://github.com/kjellberg/active_record-translated/issues",
     "source_code_uri" => "https://github.com/kjellberg/active_record-translated",
-    "rubygems_mfa_required" => "true"
   }
 
   spec.add_dependency "dry-configurable", "~> 1.0.1"

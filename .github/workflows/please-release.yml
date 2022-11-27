@@ -11,7 +11,7 @@ jobs:
         id: release
         with:
           release-type: ruby
-          package-name: authenticatable
+          package-name: active_record-translated
           version-file: "lib/active_record/translated/version.rb"
           bump-minor-pre-major: true
       - uses: actions/checkout@v2
