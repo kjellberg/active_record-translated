@@ -188,15 +188,30 @@ post_es.locale # => :es
 
 ### Fetch a translated record
 
-### #find
+Your translated model will automatically scope query results by the current locale. For example, with `I18n.locale` set to `:sv`, your model will only return Swedish results. There's some different ways to fetch translations from the database using ActiveRecord's #find:
 
-There's some different ways to fetch translations from the database using ActiveRecord's finders. The first and most obvious way is to just query a translation by its primary key. If you already now the ID, just do a normal #find. Global locale configurations, for example `I18n.locale`, is ignored by #find since we're fetching a record by its unique primary key.
+#### Find by primary key
+
+The first and most obvious way is to just query a translation by its primary key. If you already now the ID, just do a normal #find:
 
 ```ruby
+I18n.locale = :en # Ignored by #find when fetching a record by its unique primary key.
+
 post = Post.find(4) # English translation
 post_es = Post.find(5) # Spanish translation
 
 post.locale # => :en
+post_es.locale #=> :es
+```
+
+#### Find by record_id
+
+You can also find a translated record by using a record_id as the argument. This will look for a row that matches both the record_id and the current locale:
+
+```ruby
+I18n.locale = :es
+
+post = Post.find("0e048f11-0ad9-48f1-b493-36e1f01d7994") 
 post_es.locale #=> :es
 ```
 
