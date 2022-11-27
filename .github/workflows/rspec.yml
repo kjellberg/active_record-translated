@@ -1,0 +1,35 @@
+name: RSpec
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**/*.md"
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        rails:
+          - ~> 6.0
+          - ~> 6.1
+          - ~> 7.0
+          - master
+        ruby:
+          - 2.7
+          - 3.0
+    runs-on: ubuntu-latest
+    env:
+      RAILS_VERSION: ${{ matrix.rails }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: bundle install
+        run: bundle install --jobs 4 --retry 3
+      - name: Run RSpec
+        run: rake spec
