@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     "bug_tracker_uri" => "https://github.com/kjellberg/active_record-translated/issues",
     "documentation_uri" => "https://github.com/kjellberg/active_record-translated/issues",
-    "source_code_uri" => "https://github.com/kjellberg/active_record-translated",
+    "source_code_uri" => "https://github.com/kjellberg/active_record-translated"
   }
 
   spec.add_dependency "dry-configurable", "~> 1.0.1"

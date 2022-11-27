@@ -41,3 +41,6 @@ RSpec/Rails/InferredSpecType:
 
 RSpec/ExampleLength:
   Enabled: false
+
+Gemspec/RequireMFA:
+  Enabled: false
