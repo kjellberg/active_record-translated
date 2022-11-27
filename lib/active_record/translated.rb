@@ -22,7 +22,7 @@ module ActiveRecord
       end
 
       def locale
-        read_locale || config.default_locale || I18n.locale
+        read_locale || config.default_locale || I18n.locale || :en
       end
 
       def locale=(locale)
