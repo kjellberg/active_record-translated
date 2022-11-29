@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://www.github.com/kjellberg/active_record-translated/compare/v0.1.1...v0.2.0) (2022-11-29)
+
+
+### Features
+
+* first time ready for mvp with all tests passing ([97209d5](https://www.github.com/kjellberg/active_record-translated/commit/97209d58c1e1f723fc38d46253c89f7150b9aa8a))
+
 ### [0.1.1](https://www.github.com/kjellberg/active_record-translated/compare/v0.1.0...v0.1.1) (2022-11-27)
 
 
