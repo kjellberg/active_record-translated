@@ -22,9 +22,7 @@ module ActiveRecord
       end
 
       def record_id?(string)
-        return false unless string.is_a?(String)
-
-        string.match(/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$\z/)
+        string.is_a?(String) && string.match(/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$\z/) ? true : false
       end
 
       def locale

@@ -192,16 +192,13 @@ Your translated model will automatically scope query results by the current loca
 
 #### Find by primary key
 
-The first and most obvious way is to just query a translation by its primary key. If you already now the ID, just do a normal #find:
+This gem wont break the default #find method. So if you already now the ID, just fetch it with a normal #find:
 
 ```ruby
-I18n.locale = :en # Ignored by #find when fetching a record by its unique primary key.
+I18n.locale = :en # Ignored by #find when fetching a record by its primary key.
 
-post = Post.find(4) # English translation
-post_es = Post.find(5) # Spanish translation
-
-post.locale # => :en
-post_es.locale #=> :es
+post = Post.find(5) # Spanish translation
+post.locale #=> :es
 ```
 
 #### Find by record_id
@@ -212,7 +209,27 @@ You can also find a translated record by using a record_id as the argument. This
 I18n.locale = :es
 
 post = Post.find("0e048f11-0ad9-48f1-b493-36e1f01d7994") 
-post_es.locale #=> :es
+post.locale #=> :es
+```
+
+#### Fetching collection of records
+
+All query results are scoped by the current locale. Use `#unscoped_locale` to disable the locale scope.
+
+```ruby
+
+Post.create(title: "Foo bar", ..., locale: :es) # es
+Post.create(title: "Foo bar", ..., locale: :es) # es
+Post.create(title: "Foo bar", ..., locale: :pt) # pt
+
+I18n.locale = :es
+Post.count #=> :2
+
+I18n.locale = :pt
+Post.count #=> :1
+
+# Returns all posts
+Post.unscoped_locale.count #=> :3
 ```
 
 License

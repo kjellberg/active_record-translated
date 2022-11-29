@@ -44,3 +44,6 @@ RSpec/ExampleLength:
 
 Gemspec/RequireMFA:
   Enabled: false
+
+Rails/I18nLocaleAssignment:
+  Enabled: false

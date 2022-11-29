@@ -11,9 +11,11 @@ module ActiveRecord
         before_save :set_record_id
         before_save :set_locale
 
-        has_many :translations, -> { global }, class_name: "Post", foreign_key: :record_id, primary_key: :record_id
-        default_scope { where(locale: ActiveRecord::Translated.locale) }
-        scope :global, -> { unscope(where: :locale) }
+        has_many :translations, lambda {
+                                  unscoped_locale
+                                }, class_name: "Post", foreign_key: :record_id, primary_key: :record_id
+        default_scope -> { where(locale: ActiveRecord::Translated.locale) }
+        scope :unscoped_locale, -> { unscope(where: :locale) }
 
         class << self
           def find(*args)
@@ -21,7 +23,7 @@ module ActiveRecord
 
             return find_translated(id) if ActiveRecord::Translated.record_id?(id)
 
-            super(*args)
+            unscoped_locale.find(*args)
           end
 
           def exists?(id)
@@ -34,7 +36,7 @@ module ActiveRecord
           private
 
           def find_translated(record_id, allow_nil: false)
-            result = find_by(record_id: record_id)
+            result = where(record_id: record_id).first
             return result if result
 
             raise ActiveRecord::RecordNotFound unless allow_nil
@@ -42,7 +44,7 @@ module ActiveRecord
 
           # rubocop:disable Rails/WhereExists
           def exists_translated?(record_id)
-            where(record_id: record_id, locale: ActiveRecord::Translated.locale).exists?
+            translated.where(record_id: record_id).exists?
           end
           # rubocop:enable Rails/WhereExists
         end
