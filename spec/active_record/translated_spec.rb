@@ -11,14 +11,16 @@ module ActiveRecord
     describe "#generate_record_id" do
       it do
         rid = described_class.generate_record_id
-        expect(rid.match(/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$\z/)).not_to be_nil
+        expect(rid.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$\z/)).not_to be_nil
       end
     end
 
     # rubocop:disable RSpec/PredicateMatcher
     describe "#record_id?" do
-      it { expect(described_class.record_id?("0000-0000-0000")).to be_truthy }
-      it { expect(described_class.record_id?("aaaa-bbbb-cccc")).to be_truthy }
+      it { expect(described_class.record_id?("0000-0000-0000")).to be_falsey }
+      it { expect(described_class.record_id?("aaaa-bbbb-cccc")).to be_falsey }
+      it { expect(described_class.record_id?("de3b0070-fc18-4b9d-939e-c2663b0782c1")).to be_truthy }
+      it { expect(described_class.record_id?("663288e1-e0f6-417f-ad11-1cfe196fdf23")).to be_truthy }
     end
     # rubocop:enable RSpec/PredicateMatcher
 

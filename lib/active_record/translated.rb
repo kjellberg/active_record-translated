@@ -18,11 +18,12 @@ module ActiveRecord
 
     class << self
       def generate_record_id
-        SecureRandom.uuid.split("-")[1..3].join("-")
+        SecureRandom.uuid
       end
 
       def record_id?(string)
-        string.is_a?(String) && string.match(/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$\z/) ? true : false
+        regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$\z/
+        string.is_a?(String) && string.match(regex) ? true : false
       end
 
       def locale
