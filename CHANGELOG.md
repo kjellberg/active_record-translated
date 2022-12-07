@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.2.1](https://www.github.com/kjellberg/active_record-translated/compare/v0.2.0...v0.2.1) (2022-12-07)
+
+
+### Bug Fixes
+
+* rubcop ([ba144c0](https://www.github.com/kjellberg/active_record-translated/commit/ba144c0e65b3527278e4c7f168b3525133d2e4aa))
+* use uuid for record_id ([b514370](https://www.github.com/kjellberg/active_record-translated/commit/b51437088ec677c47b166b00baf774cebe9d70d5))
+
 ## [0.2.0](https://www.github.com/kjellberg/active_record-translated/compare/v0.1.1...v0.2.0) (2022-11-29)
 
 
