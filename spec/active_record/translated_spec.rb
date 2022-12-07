@@ -11,7 +11,8 @@ module ActiveRecord
     describe "#generate_record_id" do
       it do
         rid = described_class.generate_record_id
-        expect(rid.match(/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$\z/)).not_to be_nil
+        regex = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$\z/
+        expect(rid.match(regex)).not_to be_nil
       end
     end
 
